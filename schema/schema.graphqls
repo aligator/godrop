@@ -1,0 +1,39 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# Node defines one node in the filesystem tree.
+# If isFolder == true, files may be filled with children which are itself other nodes.
+# If isFolder == true, but the children are not set, they are just omitted and not loaded.
+# If isFolder == true, but the children are an empty array, they are loaded, but no child exists.
+# If isFolder == false, files has to be an empty array.
+# The fields mimeType and file may be unset.
+# To be fully flexible there may be nodes which just have a name
+# without being a folder and without being a file.
+type Node {
+  id: ID!
+  name: String!
+  description: String!
+  isFolder: Boolean!
+  mimeType: String
+  fileURL: String
+  children: [Node!]
+}
+
+type Query {
+  getNode(path: String!): Node!
+}
+
+input CreateNode {
+  name: String!
+  description: String!
+  isFolder: Boolean!
+  mimeType: String
+
+  # TODO: something for file upload
+  file: String
+}
+
+type Mutation {
+  createNode(input: CreateNode!): Node!
+}

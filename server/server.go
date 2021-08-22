@@ -9,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/aligator/godrop/server/graph"
 	"github.com/aligator/godrop/server/graph/generated"
+	"github.com/aligator/godrop/server/provider"
 	"github.com/aligator/godrop/server/service"
 )
 
@@ -20,8 +21,15 @@ func Run() {
 		port = defaultPort
 	}
 
+	repos, err := provider.NewDefaultRepos()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
-		NodeService: &service.NodeService{},
+		NodeService: &service.NodeService{
+			Repos: repos,
+		},
 	}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

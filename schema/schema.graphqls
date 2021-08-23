@@ -16,7 +16,6 @@ type Node {
   description: String!
   isFolder: Boolean!
   mimeType: String
-  fileURL: String
   children: [Node!]
 }
 

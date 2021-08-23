@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/99designs/gqlgen v0.13.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/aligator/checkpoint v0.0.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect

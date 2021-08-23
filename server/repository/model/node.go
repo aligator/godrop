@@ -6,7 +6,6 @@ type Node struct {
 	Description string
 	IsFolder    bool
 	MimeType    string
-	FileURL     string
 	Children    []Node
 }
 

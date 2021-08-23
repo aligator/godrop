@@ -7,6 +7,7 @@ import (
 )
 
 type Note interface {
-	GetNode(ctx context.Context, path string) (model.Node, error)
+	GetNodeByPath(ctx context.Context, path string) (model.Node, error)
+	GetNodeById(ctx context.Context, id string) (model.Node, error)
 	CreateNode(ctx context.Context, newNode model.CreateNode) (model.Node, error)
 }

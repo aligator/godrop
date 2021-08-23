@@ -16,6 +16,5 @@ type Node struct {
 	Description string  `json:"description"`
 	IsFolder    bool    `json:"isFolder"`
 	MimeType    *string `json:"mimeType"`
-	FileURL     *string `json:"fileURL"`
 	Children    []Node  `json:"children"`
 }

@@ -22,7 +22,7 @@ func (r *mutationResolver) CreateNode(ctx context.Context, input dto.CreateNode)
 }
 
 func (r *queryResolver) GetNode(ctx context.Context, path string) (*dto.Node, error) {
-	node, err := r.NodeService.GetNode(ctx, path)
+	node, err := r.NodeService.GetNodeByPath(ctx, path)
 
 	if err != nil {
 		return nil, err

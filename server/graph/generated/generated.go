@@ -50,7 +50,6 @@ type ComplexityRoot struct {
 	Node struct {
 		Children    func(childComplexity int) int
 		Description func(childComplexity int) int
-		FileURL     func(childComplexity int) int
 		ID          func(childComplexity int) int
 		IsFolder    func(childComplexity int) int
 		MimeType    func(childComplexity int) int
@@ -109,13 +108,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Node.Description(childComplexity), true
-
-	case "Node.fileURL":
-		if e.complexity.Node.FileURL == nil {
-			break
-		}
-
-		return e.complexity.Node.FileURL(childComplexity), true
 
 	case "Node.id":
 		if e.complexity.Node.ID == nil {
@@ -239,7 +231,6 @@ type Node {
   description: String!
   isFolder: Boolean!
   mimeType: String
-  fileURL: String
   children: [Node!]
 }
 
@@ -551,38 +542,6 @@ func (ec *executionContext) _Node_mimeType(ctx context.Context, field graphql.Co
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.MimeType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_fileURL(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FileURL, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1952,8 +1911,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "mimeType":
 			out.Values[i] = ec._Node_mimeType(ctx, field, obj)
-		case "fileURL":
-			out.Values[i] = ec._Node_fileURL(ctx, field, obj)
 		case "children":
 			out.Values[i] = ec._Node_children(ctx, field, obj)
 		default:

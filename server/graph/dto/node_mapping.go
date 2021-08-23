@@ -9,14 +9,10 @@ func NodeFromModel(node model.Node) Node {
 		Description: node.Description,
 		IsFolder:    node.IsFolder,
 		MimeType:    &node.MimeType,
-		FileURL:     &node.FileURL,
 	}
 
 	if node.MimeType == "" {
 		result.MimeType = nil
-	}
-	if node.FileURL == "" {
-		result.FileURL = nil
 	}
 
 	if node.Children != nil {

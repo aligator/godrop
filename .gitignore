@@ -1,2 +1,7 @@
 .idea
 files
+
+/node_modules/
+/ui/public/build/
+
+.DS_Store

@@ -1,6 +1,8 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-
+  "compilerOptions": {
+    "strict": true
+  },
   "include": ["ui/src/**/*"],
   "exclude": ["node_modules/*", "__sapper__/*", "ui/public/*"]
 }

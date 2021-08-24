@@ -8,6 +8,11 @@
 
 # UI
 
+## NOTE
+I had to pin the version of "@apollo/client": "3.2.7".  
+Try to use "@apollo/client": "^3.2.7" later...
+
+
 *Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
 
 ---

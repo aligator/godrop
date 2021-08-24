@@ -1,27 +1,18 @@
 <script lang="ts">
-
-    import {GetNode, GetNodeQuery, GetNodeQueryVariables} from "./api/types";
-    import type {Readable} from "svelte/store";
-    import type {ApolloQueryResult} from "@apollo/client";
-    import {ObservableQuery} from "@apollo/client";
+    import {GetNode} from "./api/types";
 
     export let name: string;
     const path = "/"
-    let node: Readable<ApolloQueryResult<GetNodeQuery> & {query: ObservableQuery<GetNodeQuery, GetNodeQueryVariables>}> = GetNode({variables: {path}})
-
+    let node = GetNode({variables: {path}})
     $: node = node
-
-    node.subscribe((value) => {
-        console.log(value?.data?.getNode)
-    })
 </script>
 
 <main>
     <h1>Hello {name}!</h1>
     <p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
     <ul>
-        {#each $node?.data?.getNode?.name || "" as filename}
-            <li>{filename}</li>
+        {#each $node?.data?.getNode?.children || "" as node}
+            <li>{node.name}</li>
         {/each}
     </ul>
 </main>

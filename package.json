@@ -7,7 +7,7 @@
     "dev": "rollup -c -w",
     "start": "sirv ui/public --no-clear",
     "check": "svelte-check --tsconfig tsconfig.json",
-    "lint:fix": "eslint ui/src/** --ext .js --ext .ts --ext .svelte --fix",
+    "lint:fix": "eslint ui/src/**/*.{ts,svelte} --fix",
     "generate": "graphql-codegen"
   },
   "devDependencies": {

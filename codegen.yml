@@ -2,6 +2,10 @@ schema: ./schema/**/*.graphqls
 documents: ./ui/src/**/*.graphql
 generates:
   ./ui/src/api/types.ts:
+    hooks:
+      afterOneFileWrite:
+        - node patchGenerated.js
+        - eslint --fix
     plugins:
       - typescript
       - typescript-operations

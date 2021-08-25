@@ -1,2 +1,5 @@
 .idea
 files
+
+ui/src/api/types.ts
+node_modules

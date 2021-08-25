@@ -43,11 +43,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Mutation struct {
-		CreateNode func(childComplexity int, input dto.CreateNode) int
-	}
-
-	Node struct {
+	FileNode struct {
 		Children    func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -56,16 +52,20 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 	}
 
+	Mutation struct {
+		CreateNode func(childComplexity int, input dto.CreateNode) int
+	}
+
 	Query struct {
 		GetNode func(childComplexity int, path string) int
 	}
 }
 
 type MutationResolver interface {
-	CreateNode(ctx context.Context, input dto.CreateNode) (*dto.Node, error)
+	CreateNode(ctx context.Context, input dto.CreateNode) (*dto.FileNode, error)
 }
 type QueryResolver interface {
-	GetNode(ctx context.Context, path string) (*dto.Node, error)
+	GetNode(ctx context.Context, path string) (*dto.FileNode, error)
 }
 
 type executableSchema struct {
@@ -83,6 +83,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "FileNode.children":
+		if e.complexity.FileNode.Children == nil {
+			break
+		}
+
+		return e.complexity.FileNode.Children(childComplexity), true
+
+	case "FileNode.description":
+		if e.complexity.FileNode.Description == nil {
+			break
+		}
+
+		return e.complexity.FileNode.Description(childComplexity), true
+
+	case "FileNode.id":
+		if e.complexity.FileNode.ID == nil {
+			break
+		}
+
+		return e.complexity.FileNode.ID(childComplexity), true
+
+	case "FileNode.isFolder":
+		if e.complexity.FileNode.IsFolder == nil {
+			break
+		}
+
+		return e.complexity.FileNode.IsFolder(childComplexity), true
+
+	case "FileNode.mimeType":
+		if e.complexity.FileNode.MimeType == nil {
+			break
+		}
+
+		return e.complexity.FileNode.MimeType(childComplexity), true
+
+	case "FileNode.name":
+		if e.complexity.FileNode.Name == nil {
+			break
+		}
+
+		return e.complexity.FileNode.Name(childComplexity), true
+
 	case "Mutation.createNode":
 		if e.complexity.Mutation.CreateNode == nil {
 			break
@@ -94,48 +136,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateNode(childComplexity, args["input"].(dto.CreateNode)), true
-
-	case "Node.children":
-		if e.complexity.Node.Children == nil {
-			break
-		}
-
-		return e.complexity.Node.Children(childComplexity), true
-
-	case "Node.description":
-		if e.complexity.Node.Description == nil {
-			break
-		}
-
-		return e.complexity.Node.Description(childComplexity), true
-
-	case "Node.id":
-		if e.complexity.Node.ID == nil {
-			break
-		}
-
-		return e.complexity.Node.ID(childComplexity), true
-
-	case "Node.isFolder":
-		if e.complexity.Node.IsFolder == nil {
-			break
-		}
-
-		return e.complexity.Node.IsFolder(childComplexity), true
-
-	case "Node.mimeType":
-		if e.complexity.Node.MimeType == nil {
-			break
-		}
-
-		return e.complexity.Node.MimeType(childComplexity), true
-
-	case "Node.name":
-		if e.complexity.Node.Name == nil {
-			break
-		}
-
-		return e.complexity.Node.Name(childComplexity), true
 
 	case "Query.getNode":
 		if e.complexity.Query.GetNode == nil {
@@ -217,7 +217,7 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
-# Node defines one node in the filesystem tree.
+# FileNode defines one node in the filesystem tree.
 # If isFolder == true, files may be filled with children which are itself other nodes.
 # If isFolder == true, but the children are not set, they are just omitted and not loaded.
 # If isFolder == true, but the children are an empty array, they are loaded, but no child exists.
@@ -225,17 +225,17 @@ var sources = []*ast.Source{
 # The fields mimeType and file may be unset.
 # To be fully flexible there may be nodes which just have a name
 # without being a folder and without being a file.
-type Node {
+type FileNode {
   id: ID!
   name: String!
   description: String!
   isFolder: Boolean!
   mimeType: String
-  children: [Node!]
+  children: [FileNode!]
 }
 
 type Query {
-  getNode(path: String!): Node!
+  getNode(path: String!): FileNode!
 }
 
 input CreateNode {
@@ -249,7 +249,7 @@ input CreateNode {
 }
 
 type Mutation {
-  createNode(input: CreateNode!): Node!
+  createNode(input: CreateNode!): FileNode!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -341,6 +341,210 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _FileNode_id(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_name(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_description(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_isFolder(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFolder, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_mimeType(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MimeType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_children(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Children, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]dto.FileNode)
+	fc.Result = res
+	return ec.marshalOFileNode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNodeᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -378,213 +582,9 @@ func (ec *executionContext) _Mutation_createNode(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*dto.Node)
+	res := resTmp.(*dto.FileNode)
 	fc.Result = res
-	return ec.marshalNNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNode(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_id(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_name(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_description(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_isFolder(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IsFolder, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_mimeType(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MimeType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Node_children(ctx context.Context, field graphql.CollectedField, obj *dto.Node) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Node",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Children, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]dto.Node)
-	fc.Result = res
-	return ec.marshalONode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNodeᚄ(ctx, field.Selections, res)
+	return ec.marshalNFileNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -624,9 +624,9 @@ func (ec *executionContext) _Query_getNode(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*dto.Node)
+	res := resTmp.(*dto.FileNode)
 	fc.Result = res
-	return ec.marshalNNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNode(ctx, field.Selections, res)
+	return ec.marshalNFileNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1847,6 +1847,52 @@ func (ec *executionContext) unmarshalInputCreateNode(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
+var fileNodeImplementors = []string{"FileNode"}
+
+func (ec *executionContext) _FileNode(ctx context.Context, sel ast.SelectionSet, obj *dto.FileNode) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fileNodeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FileNode")
+		case "id":
+			out.Values[i] = ec._FileNode_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._FileNode_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._FileNode_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isFolder":
+			out.Values[i] = ec._FileNode_isFolder(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "mimeType":
+			out.Values[i] = ec._FileNode_mimeType(ctx, field, obj)
+		case "children":
+			out.Values[i] = ec._FileNode_children(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -1867,52 +1913,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var nodeImplementors = []string{"Node"}
-
-func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj *dto.Node) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, nodeImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Node")
-		case "id":
-			out.Values[i] = ec._Node_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Node_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "description":
-			out.Values[i] = ec._Node_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "isFolder":
-			out.Values[i] = ec._Node_isFolder(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "mimeType":
-			out.Values[i] = ec._Node_mimeType(ctx, field, obj)
-		case "children":
-			out.Values[i] = ec._Node_children(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2233,6 +2233,20 @@ func (ec *executionContext) unmarshalNCreateNode2githubᚗcomᚋaligatorᚋgodro
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNFileNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx context.Context, sel ast.SelectionSet, v dto.FileNode) graphql.Marshaler {
+	return ec._FileNode(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFileNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx context.Context, sel ast.SelectionSet, v *dto.FileNode) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FileNode(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2246,20 +2260,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNode(ctx context.Context, sel ast.SelectionSet, v dto.Node) graphql.Marshaler {
-	return ec._Node(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNode(ctx context.Context, sel ast.SelectionSet, v *dto.Node) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Node(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2530,7 +2530,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalONode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []dto.Node) graphql.Marshaler {
+func (ec *executionContext) marshalOFileNode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []dto.FileNode) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2557,7 +2557,7 @@ func (ec *executionContext) marshalONode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋs
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐNode(ctx, sel, v[i])
+			ret[i] = ec.marshalNFileNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

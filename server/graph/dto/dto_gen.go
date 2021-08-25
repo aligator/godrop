@@ -10,11 +10,11 @@ type CreateNode struct {
 	File        *string `json:"file"`
 }
 
-type Node struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	IsFolder    bool    `json:"isFolder"`
-	MimeType    *string `json:"mimeType"`
-	Children    []Node  `json:"children"`
+type FileNode struct {
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	IsFolder    bool       `json:"isFolder"`
+	MimeType    *string    `json:"mimeType"`
+	Children    []FileNode `json:"children"`
 }

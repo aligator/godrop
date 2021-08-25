@@ -2,8 +2,8 @@ package dto
 
 import "github.com/aligator/godrop/server/repository/model"
 
-func NodeFromModel(node model.Node) Node {
-	result := Node{
+func NodeFromModel(node model.Node) FileNode {
+	result := FileNode{
 		ID:          node.ID,
 		Name:        node.Name,
 		Description: node.Description,

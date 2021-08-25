@@ -1,0 +1,10 @@
+schema: ./schema/**/*.graphqls
+documents: ./ui/src/**/*.graphql
+generates:
+  ./ui/src/api/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-generic-sdk
+    config:
+      clientPath: ./apollo

@@ -10,7 +10,7 @@ import (
 	"github.com/aligator/godrop/server/graph/generated"
 )
 
-func (r *mutationResolver) CreateNode(ctx context.Context, input dto.CreateNode) (*dto.Node, error) {
+func (r *mutationResolver) CreateNode(ctx context.Context, input dto.CreateNode) (*dto.FileNode, error) {
 	node, err := r.NodeService.CreateNode(ctx, dto.CreateNodeFromDTO(input))
 
 	if err != nil {
@@ -21,7 +21,7 @@ func (r *mutationResolver) CreateNode(ctx context.Context, input dto.CreateNode)
 	return &res, nil
 }
 
-func (r *queryResolver) GetNode(ctx context.Context, path string) (*dto.Node, error) {
+func (r *queryResolver) GetNode(ctx context.Context, path string) (*dto.FileNode, error) {
 	node, err := r.NodeService.GetNodeByPath(ctx, path)
 
 	if err != nil {

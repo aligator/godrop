@@ -1,0 +1,43 @@
+{
+  "name": "godrop",
+  "version": "0.1.0",
+  "main": "ui/src/index.ts",
+  "repository": "git@github.com:aligator/godrop.git",
+  "author": "aligator <aligator@suncraft-server.de>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "webpack serve --open --config webpack.dev.js --port 3000",
+    "dist": "NODE_ENV=production webpack --config webpack.prod.js",
+    "lint": "eslint ui/src/{**/*,*}.{ts,tsx}",
+    "lint:fix": "eslint ui/src/{**/*,*}.{ts,tsx} --fix",
+    "generate": "graphql-codegen"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.1.1",
+    "@graphql-codegen/typescript": "^2.1.1",
+    "@graphql-codegen/typescript-generic-sdk": "^2.1.1",
+    "@graphql-codegen/typescript-operations": "^2.1.1",
+    "@typescript-eslint/eslint-plugin": "^4.22.1",
+    "@typescript-eslint/parser": "^4.22.1",
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "copy-webpack-plugin": "^8.1.1",
+    "css-loader": "^5.2.4",
+    "eslint": "^7.25.0",
+    "eslint-webpack-plugin": "^2.5.4",
+    "fork-ts-checker-webpack-plugin": "^6.2.6",
+    "html-webpack-plugin": "^5.3.1",
+    "mini-css-extract-plugin": "^1.6.0",
+    "sass": "^1.32.12",
+    "sass-loader": "^11.0.1",
+    "style-loader": "^2.0.0",
+    "ts-loader": "^9.1.1",
+    "typescript": "^4.2.3",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "@apollo/client": "3.2.7",
+    "graphql": "^15.5.1"
+  }
+}

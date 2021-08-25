@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "outDir": "./ui/dist/",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "module": "es6",
+        "target": "es5",
+        "allowJs": true,
+        "jsx": "react",
+        "jsxFactory": "PlainJSX.createElement",
+        "jsxFragmentFactory": "PlainJSX.Fragment",
+        "strict": true,
+        "baseUrl": "./ui/src",
+        "paths": {
+            "ui/src/*": [
+                "./ui/src/*"
+            ],
+        }
+    },
+    
+    "include": [
+        "ui/src"
+    ]
+}

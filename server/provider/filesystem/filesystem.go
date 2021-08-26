@@ -20,7 +20,7 @@ type Provider struct {
 func (p *Provider) Init() error {
 	if p.FS == nil {
 
-		if err := os.Mkdir(defaultPath, 775); os.IsNotExist(err) {
+		if err := os.Mkdir(defaultPath, 0775); !os.IsExist(err) {
 			return checkpoint.From(err)
 		}
 

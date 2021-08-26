@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/aligator/godrop"
 	"log"
 	"net/http"
 	"os"
@@ -45,6 +46,7 @@ func Run() {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
+	http.Handle("/schema.graphqls", &godrop.SchemaHandler{})
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

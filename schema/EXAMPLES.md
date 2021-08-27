@@ -4,8 +4,8 @@ Here are some examples to copy paste into the [GraphQL Playground](http://localh
 
 Query:
 ```graphql
-query GetNode($path: String!) {
-  getNode(path: $path) {
+query GetFileNode($path: String!) {
+  getFileNode(path: $path) {
     id,
     name,
     description,

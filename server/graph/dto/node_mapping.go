@@ -2,45 +2,45 @@ package dto
 
 import "github.com/aligator/godrop/server/repository/model"
 
-func NodeFromModel(node model.Node) Node {
-	result := Node{
-		ID:          node.ID,
-		Name:        node.Name,
-		Description: node.Description,
-		IsFolder:    node.IsFolder,
-		MimeType:    &node.MimeType,
+func FileNodeFromModel(fileNode model.FileNode) FileNode {
+	result := FileNode{
+		ID:          fileNode.ID,
+		Name:        fileNode.Name,
+		Description: fileNode.Description,
+		IsFolder:    fileNode.IsFolder,
+		MimeType:    &fileNode.MimeType,
 	}
 
-	if node.MimeType == "" {
+	if fileNode.MimeType == "" {
 		result.MimeType = nil
 	}
 
-	if node.Children != nil {
-		for _, child := range node.Children {
-			result.Children = append(result.Children, NodeFromModel(child))
+	if fileNode.Children != nil {
+		for _, child := range fileNode.Children {
+			result.Children = append(result.Children, FileNodeFromModel(child))
 		}
 	}
 
 	return result
 }
 
-func CreateNodeFromDTO(node CreateNode) model.CreateNode {
-	result := model.CreateNode{
-		Name:        node.Name,
-		Description: node.Description,
-		IsFolder:    node.IsFolder,
+func CreateFileNodeFromDTO(FileNode CreateFileNode) model.CreateFileNode {
+	result := model.CreateFileNode{
+		Name:        FileNode.Name,
+		Description: FileNode.Description,
+		IsFolder:    FileNode.IsFolder,
 	}
 
-	if node.MimeType == nil {
+	if FileNode.MimeType == nil {
 		result.MimeType = ""
 	} else {
-		result.MimeType = *node.MimeType
+		result.MimeType = *FileNode.MimeType
 	}
 
-	if node.File == nil {
+	if FileNode.File == nil {
 		result.File = []byte{}
 	} else {
-		result.File = []byte(*node.File)
+		result.File = []byte(*FileNode.File)
 	}
 
 	return result

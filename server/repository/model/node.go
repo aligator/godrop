@@ -1,15 +1,15 @@
 package model
 
-type Node struct {
+type FileNode struct {
 	ID          string
 	Name        string
 	Description string
 	IsFolder    bool
 	MimeType    string
-	Children    []Node
+	Children    []FileNode
 }
 
-type CreateNode struct {
+type CreateFileNode struct {
 	Name        string
 	Description string
 	IsFolder    bool

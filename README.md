@@ -1,4 +1,4 @@
 
-`go install github.com/vektah/gqlparser/v2@v2.1.0`
+`go install github.com/99designs/gqlgen@latest`
 `go generate`
 `go run ./cmd/godrop`

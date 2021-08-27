@@ -2,28 +2,28 @@
 #
 # https://gqlgen.com/getting-started/
 
-# Node defines one node in the filesystem tree.
-# If isFolder == true, files may be filled with children which are itself other nodes.
+# FileNode defines one FileNode in the filesystem tree.
+# If isFolder == true, files may be filled with children which are itself other FileNodes.
 # If isFolder == true, but the children are not set, they are just omitted and not loaded.
 # If isFolder == true, but the children are an empty array, they are loaded, but no child exists.
 # If isFolder == false, files has to be an empty array.
 # The fields mimeType and file may be unset.
-# To be fully flexible there may be nodes which just have a name
+# To be fully flexible there may be FileNodes which just have a name
 # without being a folder and without being a file.
-type Node {
+type FileNode {
   id: ID!
   name: String!
   description: String!
   isFolder: Boolean!
   mimeType: String
-  children: [Node!]
+  children: [FileNode!]
 }
 
 type Query {
-  getNode(path: String!): Node!
+  getFileNode(path: String!): FileNode!
 }
 
-input CreateNode {
+input CreateFileNode {
   name: String!
   description: String!
   isFolder: Boolean!
@@ -34,5 +34,5 @@ input CreateNode {
 }
 
 type Mutation {
-  createNode(input: CreateNode!): Node!
+  createFileNode(input: CreateFileNode!): FileNode!
 }

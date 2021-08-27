@@ -7,5 +7,5 @@ import "github.com/aligator/godrop/server/service"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	NodeService *service.NodeService
+	FileNodeService *service.FileNodeService
 }

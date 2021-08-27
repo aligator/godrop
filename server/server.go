@@ -14,12 +14,24 @@ import (
 	"github.com/aligator/godrop/server/graph/generated"
 	"github.com/aligator/godrop/server/provider"
 	"github.com/aligator/godrop/server/service"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const defaultPort = "8080"
 
 func Run() {
+	router := chi.NewRouter()
+
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+	}).Handler)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -32,7 +44,7 @@ func Run() {
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &graph.Resolver{
-			NodeService: &service.NodeService{
+			FileNodeService: &service.FileNodeService{
 				Repos: repos,
 			},
 		},
@@ -44,10 +56,10 @@ func Run() {
 		return err
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
-	http.Handle("/schema.graphqls", &godrop.SchemaHandler{})
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
+	router.Handle("/schema.graphql", &godrop.SchemaHandler{})
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

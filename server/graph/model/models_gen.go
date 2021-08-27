@@ -2,7 +2,7 @@
 
 package model
 
-type NewNode struct {
+type NewFileNode struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	IsFolder    bool    `json:"isFolder"`
@@ -10,12 +10,12 @@ type NewNode struct {
 	File        *string `json:"file"`
 }
 
-type Node struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	IsFolder    bool    `json:"isFolder"`
-	MimeType    *string `json:"mimeType"`
-	File        *string `json:"file"`
-	Children    []Node  `json:"children"`
+type FileNode struct {
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	IsFolder    bool       `json:"isFolder"`
+	MimeType    *string    `json:"mimeType"`
+	File        *string    `json:"file"`
+	Children    []FileNode `json:"children"`
 }

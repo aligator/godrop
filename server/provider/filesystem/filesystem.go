@@ -30,21 +30,21 @@ func (p *Provider) Init() error {
 	return nil
 }
 
-func (p *Provider) readNode(path string, withChildren bool) (model.Node, error) {
-	result := model.Node{}
+func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode, error) {
+	result := model.FileNode{}
 
 	file, err := p.FS.Open(path)
 	if err != nil {
-		return model.Node{}, checkpoint.From(err)
+		return model.FileNode{}, checkpoint.From(err)
 	}
 
-	nodeStat, err := file.Stat()
+	FileNodeStat, err := file.Stat()
 	if err != nil {
-		return model.Node{}, checkpoint.From(err)
+		return model.FileNode{}, checkpoint.From(err)
 	}
 
-	result.IsFolder = nodeStat.IsDir()
-	result.Name = file.Name()
+	result.IsFolder = FileNodeStat.IsDir()
+	result.Name = filepath.Base(file.Name())
 
 	// For now just use the path as id.
 	// Later we will cache all files in a db and can use that id.
@@ -55,32 +55,32 @@ func (p *Provider) readNode(path string, withChildren bool) (model.Node, error) 
 	if result.IsFolder && withChildren {
 		children, err := file.Readdirnames(0)
 		if err != nil {
-			return model.Node{}, checkpoint.From(err)
+			return model.FileNode{}, checkpoint.From(err)
 		}
 
 		for _, child := range children {
 			// Populate the children without the children.
-			childNode, err := p.readNode(filepath.Join(path, child), false)
+			childFileNode, err := p.readFileNode(filepath.Join(path, child), false)
 			if err != nil {
-				return model.Node{}, checkpoint.From(err)
+				return model.FileNode{}, checkpoint.From(err)
 			}
 
-			result.Children = append(result.Children, childNode)
+			result.Children = append(result.Children, childFileNode)
 		}
 	}
 
 	return result, nil
 }
 
-func (p *Provider) GetNodeByPath(ctx context.Context, path string) (model.Node, error) {
-	return p.readNode(path, true)
+func (p *Provider) GetFileNodeByPath(ctx context.Context, path string) (model.FileNode, error) {
+	return p.readFileNode(path, true)
 }
 
-func (p *Provider) GetNodeById(ctx context.Context, id string) (model.Node, error) {
+func (p *Provider) GetFileNodeById(ctx context.Context, id string) (model.FileNode, error) {
 	// For now the id is also the path.
-	return p.readNode(id, true)
+	return p.readFileNode(id, true)
 }
 
-func (p *Provider) CreateNode(ctx context.Context, newNode model.CreateNode) (model.Node, error) {
+func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error) {
 	panic("implement me")
 }

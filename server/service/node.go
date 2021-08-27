@@ -7,14 +7,14 @@ import (
 	"github.com/aligator/godrop/server/repository/model"
 )
 
-type NodeService struct {
+type FileNodeService struct {
 	Repos *provider.Repositories
 }
 
-func (n NodeService) GetNodeByPath(ctx context.Context, path string) (model.Node, error) {
-	return n.Repos.Note.GetNodeByPath(ctx, path)
+func (n FileNodeService) GetFileNodeByPath(ctx context.Context, path string) (model.FileNode, error) {
+	return n.Repos.Note.GetFileNodeByPath(ctx, path)
 }
 
-func (n NodeService) CreateNode(ctx context.Context, newNode model.CreateNode) (model.Node, error) {
-	return n.Repos.Note.CreateNode(ctx, newNode)
+func (n FileNodeService) CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error) {
+	return n.Repos.Note.CreateFileNode(ctx, newFileNode)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type Repositories struct {
-	Note repository.Note
+	Note repository.FileNode
 }
 
 func NewDefaultRepos() (*Repositories, error) {

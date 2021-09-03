@@ -9,6 +9,7 @@ func FileNodeFromModel(fileNode model.FileNode) FileNode {
 		Description: fileNode.Description,
 		IsFolder:    fileNode.IsFolder,
 		MimeType:    &fileNode.MimeType,
+		Size:        fileNode.Size,
 	}
 
 	if fileNode.MimeType == "" {
@@ -38,9 +39,9 @@ func CreateFileNodeFromDTO(FileNode CreateFileNode) model.CreateFileNode {
 	}
 
 	if FileNode.File == nil {
-		result.File = []byte{}
+		result.File = nil
 	} else {
-		result.File = []byte(*FileNode.File)
+		result.File = FileNode.File.File
 	}
 
 	return result

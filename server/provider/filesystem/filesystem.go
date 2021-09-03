@@ -2,11 +2,14 @@ package filesystem
 
 import (
 	"context"
+	"errors"
+	"io"
 	"mime"
 	"os"
 	"path/filepath"
 
 	"github.com/aligator/checkpoint"
+	"github.com/aligator/godrop/server/repository"
 	"github.com/aligator/godrop/server/repository/model"
 	"github.com/spf13/afero"
 )
@@ -38,12 +41,12 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 		return model.FileNode{}, checkpoint.From(err)
 	}
 
-	FileNodeStat, err := file.Stat()
+	fileStat, err := file.Stat()
 	if err != nil {
 		return model.FileNode{}, checkpoint.From(err)
 	}
 
-	result.IsFolder = FileNodeStat.IsDir()
+	result.IsFolder = fileStat.IsDir()
 	result.Name = filepath.Base(file.Name())
 
 	// For now just use the path as id.
@@ -69,6 +72,8 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 		}
 	}
 
+	result.Size = fileStat.Size()
+
 	return result, nil
 }
 
@@ -82,5 +87,30 @@ func (p *Provider) GetFileNodeById(ctx context.Context, id string) (model.FileNo
 }
 
 func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error) {
-	panic("implement me")
+	newFilePath := filepath.Join(newFileNode.Path, newFileNode.Name)
+
+	file, err := p.FS.Create(newFilePath)
+	if errors.Is(err, afero.ErrFileExists) {
+		return model.FileNode{}, checkpoint.Wrap(err, repository.ErrFileAlreadyExists)
+	} else if err != nil {
+		return model.FileNode{}, checkpoint.From(err)
+	}
+
+	// stream from the file reader to the file writer.
+	buffer := make([]byte, 4)
+	for {
+		n, err := newFileNode.File.Read(buffer)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return model.FileNode{}, checkpoint.From(err)
+		}
+
+		_, err = file.Write(buffer[:n])
+		if err != nil {
+			return model.FileNode{}, checkpoint.From(err)
+		}
+	}
+
+	return p.GetFileNodeByPath(ctx, newFilePath)
 }

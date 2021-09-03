@@ -2,6 +2,9 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Upload
+scalar Int64
+
 # FileNode defines one FileNode in the filesystem tree.
 # If isFolder == true, files may be filled with children which are itself other FileNodes.
 # If isFolder == true, but the children are not set, they are just omitted and not loaded.
@@ -17,6 +20,7 @@ type FileNode {
   isFolder: Boolean!
   mimeType: String
   children: [FileNode!]
+  size: Int64!
 }
 
 type Query {
@@ -25,12 +29,14 @@ type Query {
 
 input CreateFileNode {
   name: String!
+  path: String!
   description: String!
   isFolder: Boolean!
   mimeType: String
 
-  # TODO: something for file upload
-  file: String
+  # TODO: maybe later use Signed URLs instead:
+  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
+  file: Upload
 }
 
 type Mutation {

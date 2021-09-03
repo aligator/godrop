@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 		IsFolder    func(childComplexity int) int
 		MimeType    func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Size        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -124,6 +125,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FileNode.Name(childComplexity), true
+
+	case "FileNode.size":
+		if e.complexity.FileNode.Size == nil {
+			break
+		}
+
+		return e.complexity.FileNode.Size(childComplexity), true
 
 	case "Mutation.createFileNode":
 		if e.complexity.Mutation.CreateFileNode == nil {
@@ -217,6 +225,9 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
+scalar Upload
+scalar Int64
+
 # FileNode defines one FileNode in the filesystem tree.
 # If isFolder == true, files may be filled with children which are itself other FileNodes.
 # If isFolder == true, but the children are not set, they are just omitted and not loaded.
@@ -232,6 +243,7 @@ type FileNode {
   isFolder: Boolean!
   mimeType: String
   children: [FileNode!]
+  size: Int64!
 }
 
 type Query {
@@ -240,12 +252,14 @@ type Query {
 
 input CreateFileNode {
   name: String!
+  path: String!
   description: String!
   isFolder: Boolean!
   mimeType: String
 
-  # TODO: something for file upload
-  file: String
+  # TODO: maybe later use Signed URLs instead:
+  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
+  file: Upload
 }
 
 type Mutation {
@@ -543,6 +557,41 @@ func (ec *executionContext) _FileNode_children(ctx context.Context, field graphq
 	res := resTmp.([]dto.FileNode)
 	fc.Result = res
 	return ec.marshalOFileNode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNodeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileNode_size(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Size, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt642int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createFileNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1801,6 +1850,14 @@ func (ec *executionContext) unmarshalInputCreateFileNode(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "path":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("path"))
+			it.Path, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description":
 			var err error
 
@@ -1829,7 +1886,7 @@ func (ec *executionContext) unmarshalInputCreateFileNode(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-			it.File, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.File, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1882,6 +1939,11 @@ func (ec *executionContext) _FileNode(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._FileNode_mimeType(ctx, field, obj)
 		case "children":
 			out.Values[i] = ec._FileNode_children(ctx, field, obj)
+		case "size":
+			out.Values[i] = ec._FileNode_size(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2262,6 +2324,21 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt642int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt642int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2592,6 +2669,21 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (*graphql.Upload, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalUpload(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v *graphql.Upload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalUpload(*v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

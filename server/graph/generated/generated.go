@@ -54,7 +54,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateFileNode func(childComplexity int, input dto.CreateFileNode) int
+		CreateFileNode func(childComplexity int, meta dto.CreateFileNode, file *graphql.Upload) int
 	}
 
 	Query struct {
@@ -63,7 +63,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateFileNode(ctx context.Context, input dto.CreateFileNode) (*dto.FileNode, error)
+	CreateFileNode(ctx context.Context, meta dto.CreateFileNode, file *graphql.Upload) (*dto.FileNode, error)
 }
 type QueryResolver interface {
 	GetFileNode(ctx context.Context, path string) (*dto.FileNode, error)
@@ -143,7 +143,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateFileNode(childComplexity, args["input"].(dto.CreateFileNode)), true
+		return e.complexity.Mutation.CreateFileNode(childComplexity, args["meta"].(dto.CreateFileNode), args["file"].(*graphql.Upload)), true
 
 	case "Query.getFileNode":
 		if e.complexity.Query.GetFileNode == nil {
@@ -242,8 +242,8 @@ type FileNode {
   description: String!
   isFolder: Boolean!
   mimeType: String
-  children: [FileNode!]
   size: Int64!
+  children: [FileNode!]
 }
 
 type Query {
@@ -256,14 +256,12 @@ input CreateFileNode {
   description: String!
   isFolder: Boolean!
   mimeType: String
-
-  # TODO: maybe later use Signed URLs instead:
-  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
-  file: Upload
 }
 
 type Mutation {
-  createFileNode(input: CreateFileNode!): FileNode!
+  # TODO: maybe later use Signed URLs instead:
+  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
+  createFileNode(meta: CreateFileNode!, file: Upload): FileNode!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -276,14 +274,23 @@ func (ec *executionContext) field_Mutation_createFileNode_args(ctx context.Conte
 	var err error
 	args := map[string]interface{}{}
 	var arg0 dto.CreateFileNode
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["meta"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
 		arg0, err = ec.unmarshalNCreateFileNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐCreateFileNode(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["meta"] = arg0
+	var arg1 *graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		arg1, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["file"] = arg1
 	return args, nil
 }
 
@@ -527,38 +534,6 @@ func (ec *executionContext) _FileNode_mimeType(ctx context.Context, field graphq
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _FileNode_children(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "FileNode",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Children, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]dto.FileNode)
-	fc.Result = res
-	return ec.marshalOFileNode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNodeᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _FileNode_size(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -594,6 +569,38 @@ func (ec *executionContext) _FileNode_size(ctx context.Context, field graphql.Co
 	return ec.marshalNInt642int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _FileNode_children(ctx context.Context, field graphql.CollectedField, obj *dto.FileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileNode",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Children, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]dto.FileNode)
+	fc.Result = res
+	return ec.marshalOFileNode2ᚕgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNodeᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createFileNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -619,7 +626,7 @@ func (ec *executionContext) _Mutation_createFileNode(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateFileNode(rctx, args["input"].(dto.CreateFileNode))
+		return ec.resolvers.Mutation().CreateFileNode(rctx, args["meta"].(dto.CreateFileNode), args["file"].(*graphql.Upload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1882,14 +1889,6 @@ func (ec *executionContext) unmarshalInputCreateFileNode(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
-		case "file":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-			it.File, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -1937,13 +1936,13 @@ func (ec *executionContext) _FileNode(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "mimeType":
 			out.Values[i] = ec._FileNode_mimeType(ctx, field, obj)
-		case "children":
-			out.Values[i] = ec._FileNode_children(ctx, field, obj)
 		case "size":
 			out.Values[i] = ec._FileNode_size(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "children":
+			out.Values[i] = ec._FileNode_children(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

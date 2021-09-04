@@ -2,17 +2,12 @@
 
 package dto
 
-import (
-	"github.com/99designs/gqlgen/graphql"
-)
-
 type CreateFileNode struct {
-	Name        string          `json:"name"`
-	Path        string          `json:"path"`
-	Description string          `json:"description"`
-	IsFolder    bool            `json:"isFolder"`
-	MimeType    *string         `json:"mimeType"`
-	File        *graphql.Upload `json:"file"`
+	Name        string  `json:"name"`
+	Path        string  `json:"path"`
+	Description string  `json:"description"`
+	IsFolder    bool    `json:"isFolder"`
+	MimeType    *string `json:"mimeType"`
 }
 
 type FileNode struct {
@@ -21,6 +16,6 @@ type FileNode struct {
 	Description string     `json:"description"`
 	IsFolder    bool       `json:"isFolder"`
 	MimeType    *string    `json:"mimeType"`
-	Children    []FileNode `json:"children"`
 	Size        int64      `json:"size"`
+	Children    []FileNode `json:"children"`
 }

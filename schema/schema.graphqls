@@ -19,8 +19,8 @@ type FileNode {
   description: String!
   isFolder: Boolean!
   mimeType: String
-  children: [FileNode!]
   size: Int64!
+  children: [FileNode!]
 }
 
 type Query {
@@ -33,12 +33,10 @@ input CreateFileNode {
   description: String!
   isFolder: Boolean!
   mimeType: String
-
-  # TODO: maybe later use Signed URLs instead:
-  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
-  file: Upload
 }
 
 type Mutation {
-  createFileNode(input: CreateFileNode!): FileNode!
+  # TODO: maybe later use Signed URLs instead:
+  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
+  createFileNode(meta: CreateFileNode!, file: Upload): FileNode!
 }

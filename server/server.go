@@ -61,7 +61,7 @@ func Run() {
 	router.Handle("/query", srv)
 	router.Handle("/schema.graphql", &godrop.SchemaHandler{})
 	router.Handle("/file/*", &file.Handler{
-		FileService: service.FileService{
+		FileService: &service.FileService{
 			Repos: repos,
 		},
 		TrimSuffix: "/file",

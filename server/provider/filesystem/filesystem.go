@@ -45,7 +45,7 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 	file, err := p.FS.Open(path)
 	if errors.Is(err, afero.ErrFileNotFound) {
 		// Try the uploading file.
-		return p.readFileNode(filepath.Join(path, uploadSuffix), withChildren)
+		return p.readFileNode(path+uploadSuffix, withChildren)
 	} else if err != nil {
 		return model.FileNode{}, checkpoint.From(err)
 	}
@@ -116,7 +116,7 @@ func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateF
 			return model.FileNode{}, checkpoint.From(err)
 		}
 	} else {
-		newFilePath = filepath.Join(newFilePath, uploadSuffix)
+		newFilePath = newFilePath + uploadSuffix
 
 		_, err := p.FS.Create(newFilePath)
 		if errors.Is(err, afero.ErrFileExists) {
@@ -139,18 +139,18 @@ func (p *Provider) SetState(ctx context.Context, id string, newState model.NodeS
 	newName := id
 
 	if file.State == model.NodeStateUpload {
-		oldName = filepath.Join(id, uploadSuffix)
+		oldName = id + uploadSuffix
 	}
 
 	if newState == model.NodeStateUpload {
-		newName = filepath.Join(id, uploadSuffix)
+		newName = id + uploadSuffix
 	}
 
 	return checkpoint.From(p.FS.Rename(oldName, newName))
 }
 
 func (p *Provider) Save(ctx context.Context, id string, reader io.Reader) error {
-	file, err := p.FS.Open(id)
+	file, err := p.FS.OpenFile(id+uploadSuffix, os.O_APPEND|os.O_WRONLY, 0)
 	if err != nil {
 		return checkpoint.From(err)
 	}

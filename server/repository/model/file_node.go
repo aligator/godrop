@@ -1,14 +1,10 @@
 package model
 
-import (
-	"github.com/aligator/godrop/server/graph/dto"
-)
-
-type NodeState = dto.NodeState
+type NodeState = string
 
 const (
-	NodeStateUpload = dto.NodeStateUpload
-	NodeStateReady  = dto.NodeStateReady
+	NodeStateUpload NodeState = "UPLOAD"
+	NodeStateReady  NodeState = "READY"
 )
 
 type FileNode struct {

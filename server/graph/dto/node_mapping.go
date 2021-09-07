@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/aligator/godrop/server/repository/model"
 )
 
@@ -28,16 +27,12 @@ func FileNodeFromModel(fileNode model.FileNode) FileNode {
 	return result
 }
 
-func CreateFileNodeFromDTO(meta CreateFileNode, file *graphql.Upload) model.CreateFileNode {
+func CreateFileNodeFromDTO(meta CreateFileNode) model.CreateFileNode {
 	result := model.CreateFileNode{
 		Path:        meta.Path,
 		Name:        meta.Name,
 		Description: meta.Description,
 		IsFolder:    meta.IsFolder,
-	}
-
-	if file != nil {
-		result.File = file.File
 	}
 
 	if meta.MimeType == nil {

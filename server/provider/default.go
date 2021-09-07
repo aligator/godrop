@@ -6,16 +6,18 @@ import (
 )
 
 type Repositories struct {
-	Note repository.FileNode
+	Node repository.FileNode
+	File repository.File
 }
 
 func NewDefaultRepos() (*Repositories, error) {
-	filesystem := new(filesystem.Provider)
+	fsProvider := new(filesystem.Provider)
 
 	repos := &Repositories{
-		Note: filesystem,
+		Node: fsProvider,
+		File: fsProvider,
 	}
-	err := filesystem.Init()
+	err := fsProvider.Init()
 	if err != nil {
 		return nil, err
 	}

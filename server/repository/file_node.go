@@ -18,4 +18,6 @@ type FileNode interface {
 	// CreateFileNode creates the given file.
 	// It may return ErrFileAlreadyExists.
 	CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error)
+
+	SetState(ctx context.Context, id string, newState model.NodeState) error
 }

@@ -12,9 +12,9 @@ type FileNodeService struct {
 }
 
 func (n FileNodeService) GetFileNodeByPath(ctx context.Context, path string) (model.FileNode, error) {
-	return n.Repos.Note.GetFileNodeByPath(ctx, path)
+	return n.Repos.Node.GetFileNodeByPath(ctx, path)
 }
 
 func (n FileNodeService) CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error) {
-	return n.Repos.Note.CreateFileNode(ctx, newFileNode)
+	return n.Repos.Node.CreateFileNode(ctx, newFileNode)
 }

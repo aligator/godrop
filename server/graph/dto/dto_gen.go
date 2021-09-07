@@ -2,6 +2,12 @@
 
 package dto
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type CreateFileNode struct {
 	Name        string  `json:"name"`
 	Path        string  `json:"path"`
@@ -15,7 +21,49 @@ type FileNode struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	IsFolder    bool       `json:"isFolder"`
+	State       NodeState  `json:"state"`
 	MimeType    *string    `json:"mimeType"`
 	Size        int64      `json:"size"`
 	Children    []FileNode `json:"children"`
+}
+
+type NodeState string
+
+const (
+	NodeStateUpload NodeState = "UPLOAD"
+	NodeStateReady  NodeState = "READY"
+)
+
+var AllNodeState = []NodeState{
+	NodeStateUpload,
+	NodeStateReady,
+}
+
+func (e NodeState) IsValid() bool {
+	switch e {
+	case NodeStateUpload, NodeStateReady:
+		return true
+	}
+	return false
+}
+
+func (e NodeState) String() string {
+	return string(e)
+}
+
+func (e *NodeState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NodeState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NodeState", str)
+	}
+	return nil
+}
+
+func (e NodeState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

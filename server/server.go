@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/aligator/godrop"
+	"github.com/aligator/godrop/server/file"
 	"log"
 	"net/http"
 	"os"
@@ -59,6 +60,12 @@ func Run() {
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 	router.Handle("/schema.graphql", &godrop.SchemaHandler{})
+	router.Handle("/file/*", &file.Handler{
+		FileService: service.FileService{
+			Repos: repos,
+		},
+		TrimSuffix: "/file",
+	})
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

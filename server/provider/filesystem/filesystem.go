@@ -7,6 +7,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aligator/checkpoint"
 	"github.com/aligator/godrop/server/repository"
@@ -15,6 +16,11 @@ import (
 )
 
 const defaultPath = "./files"
+const uploadSuffix = ".uploading"
+
+var (
+	ErrNameNotAllowed = errors.New("the name is not allowed")
+)
 
 type Provider struct {
 	FS afero.Fs
@@ -37,7 +43,10 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 	result := model.FileNode{}
 
 	file, err := p.FS.Open(path)
-	if err != nil {
+	if errors.Is(err, afero.ErrFileNotFound) {
+		// Try the uploading file.
+		return p.readFileNode(filepath.Join(path, uploadSuffix), withChildren)
+	} else if err != nil {
 		return model.FileNode{}, checkpoint.From(err)
 	}
 
@@ -74,6 +83,13 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 
 	result.Size = fileStat.Size()
 
+	if strings.HasSuffix(result.Name, uploadSuffix) {
+		result.State = model.NodeStateUpload
+		result.Name = strings.TrimSuffix(result.Name, uploadSuffix)
+	} else {
+		result.State = model.NodeStateReady
+	}
+
 	return result, nil
 }
 
@@ -87,30 +103,68 @@ func (p *Provider) GetFileNodeById(ctx context.Context, id string) (model.FileNo
 }
 
 func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error) {
-	newFilePath := filepath.Join(newFileNode.Path, newFileNode.Name)
-
-	file, err := p.FS.Create(newFilePath)
-	if errors.Is(err, afero.ErrFileExists) {
-		return model.FileNode{}, checkpoint.Wrap(err, repository.ErrFileAlreadyExists)
-	} else if err != nil {
-		return model.FileNode{}, checkpoint.From(err)
+	// Check file name.
+	if strings.HasSuffix(newFileNode.Name, uploadSuffix) {
+		return model.FileNode{}, checkpoint.From(ErrNameNotAllowed)
 	}
 
-	// stream from the file reader to the file writer.
-	buffer := make([]byte, 4)
-	for {
-		n, err := newFileNode.File.Read(buffer)
-		if err == io.EOF {
-			break
-		} else if err != nil {
+	newFilePath := filepath.Join(newFileNode.Path, newFileNode.Name)
+
+	if newFileNode.IsFolder {
+		err := p.FS.Mkdir(newFilePath, 0755)
+		if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
+	} else {
+		newFilePath = filepath.Join(newFilePath, uploadSuffix)
 
-		_, err = file.Write(buffer[:n])
-		if err != nil {
+		_, err := p.FS.Create(newFilePath)
+		if errors.Is(err, afero.ErrFileExists) {
+			return model.FileNode{}, checkpoint.Wrap(err, repository.ErrFileAlreadyExists)
+		} else if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
 	}
 
 	return p.GetFileNodeByPath(ctx, newFilePath)
+}
+
+func (p *Provider) SetState(ctx context.Context, id string, newState model.NodeState) error {
+	file, err := p.GetFileNodeById(ctx, id)
+	if err != nil {
+		return checkpoint.From(err)
+	}
+
+	oldName := id
+	newName := id
+
+	if file.State == model.NodeStateUpload {
+		oldName = filepath.Join(id, uploadSuffix)
+	}
+
+	if newState == model.NodeStateUpload {
+		newName = filepath.Join(id, uploadSuffix)
+	}
+
+	return checkpoint.From(p.FS.Rename(oldName, newName))
+}
+
+func (p *Provider) Save(ctx context.Context, id string, reader io.Reader) error {
+	file, err := p.FS.Open(id)
+	if err != nil {
+		return checkpoint.From(err)
+	}
+
+	_, err = io.Copy(file, reader)
+	return checkpoint.From(err)
+}
+
+func (p *Provider) Read(ctx context.Context, id string, writer io.Writer) error {
+	file, err := p.FS.Open(id)
+	if err != nil {
+		return checkpoint.From(err)
+	}
+
+	_, err = io.Copy(writer, file)
+	return checkpoint.From(err)
 }

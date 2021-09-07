@@ -6,13 +6,12 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/aligator/godrop/server/graph/dto"
 	"github.com/aligator/godrop/server/graph/generated"
 )
 
-func (r *mutationResolver) CreateFileNode(ctx context.Context, meta dto.CreateFileNode, file *graphql.Upload) (*dto.FileNode, error) {
-	fileNode, err := r.FileNodeService.CreateFileNode(ctx, dto.CreateFileNodeFromDTO(meta, file))
+func (r *mutationResolver) CreateFileNode(ctx context.Context, meta dto.CreateFileNode) (*dto.FileNode, error) {
+	fileNode, err := r.FileNodeService.CreateFileNode(ctx, dto.CreateFileNodeFromDTO(meta))
 
 	if err != nil {
 		return nil, err

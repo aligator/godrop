@@ -60,7 +60,7 @@ func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode,
 
 	// For now just use the path as id.
 	// Later we will cache all files in a db and can use that id.
-	result.ID = path
+	result.ID = strings.TrimSuffix(file.Name(), uploadSuffix)
 
 	result.MimeType = mime.TypeByExtension(filepath.Ext(result.Name))
 
@@ -108,15 +108,15 @@ func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateF
 		return model.FileNode{}, checkpoint.From(ErrNameNotAllowed)
 	}
 
-	newFilePath := filepath.Join(newFileNode.Path, newFileNode.Name)
+	newFileId := filepath.Join(newFileNode.Path, newFileNode.Name)
 
 	if newFileNode.IsFolder {
-		err := p.FS.Mkdir(newFilePath, 0755)
+		err := p.FS.Mkdir(newFileId, 0755)
 		if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
 	} else {
-		newFilePath = newFilePath + uploadSuffix
+		newFilePath := newFileId + uploadSuffix
 
 		_, err := p.FS.Create(newFilePath)
 		if errors.Is(err, afero.ErrFileExists) {
@@ -126,7 +126,7 @@ func (p *Provider) CreateFileNode(ctx context.Context, newFileNode model.CreateF
 		}
 	}
 
-	return p.GetFileNodeByPath(ctx, newFilePath)
+	return p.GetFileNodeByPath(ctx, newFileId)
 }
 
 func (p *Provider) SetState(ctx context.Context, id string, newState model.NodeState) error {

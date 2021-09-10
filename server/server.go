@@ -2,11 +2,14 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/aligator/godrop"
 	"github.com/aligator/godrop/server/file"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -22,7 +25,7 @@ import (
 
 const defaultPort = "8080"
 
-func Run() {
+func Run(frontend fs.FS) {
 	router := chi.NewRouter()
 
 	router.Use(cors.New(cors.Options{
@@ -57,7 +60,31 @@ func Run() {
 		return err
 	})
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	if frontend != nil {
+		httpFS := http.FileServer(http.FS(frontend))
+		router.Handle("/*", http.StripPrefix("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer httpFS.ServeHTTP(w, r)
+
+			if r.URL.Path == "" {
+				r.URL.Path = "/"
+				return
+			}
+
+			f, err := frontend.Open(strings.TrimSuffix(r.URL.Path, "/"))
+			if errors.Is(err, fs.ErrNotExist) {
+				r.URL.Path = "/"
+				return
+			} else if err != nil {
+				panic(err)
+			} else {
+				err := f.Close()
+				if err != nil {
+					panic(err)
+				}
+			}
+		})))
+	}
+	router.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 	router.Handle("/schema.graphql", &godrop.SchemaHandler{})
 	router.Handle("/file/*", &file.Handler{
@@ -67,6 +94,6 @@ func Run() {
 		TrimSuffix: "/file",
 	})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/playground for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

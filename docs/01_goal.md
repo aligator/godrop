@@ -2,7 +2,7 @@
 
 GoDrop is a cloud file server similar to e.g. Nextcloud but much simpler.
 
-## Milestone v0.1.0
+## Milestone v0.2.0
 
 The first step is to create a fully functional file upload server which can just
 be started and then accessed through a specific port. It then provides a simple 
@@ -18,5 +18,5 @@ but it should be as easy as re-implementing a filesystem to replace the data sou
 [x] UI can show a folder and navigate  
 [x] UI can create a sub folder  
 [x] UI can upload a file  
-[ ] UI can download a file.  
+[x] UI can download a file.  
 

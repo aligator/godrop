@@ -2,14 +2,14 @@ package service
 
 import (
 	"context"
-	"github.com/aligator/godrop/server"
+	"github.com/aligator/godrop/server/log"
 
 	"github.com/aligator/godrop/server/provider"
 	"github.com/aligator/godrop/server/repository/model"
 )
 
 type FileNodeService struct {
-	Logger server.GoDropLogger
+	Logger log.GoDropLogger
 	Repos  *provider.Repositories
 }
 

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/aligator/checkpoint"
-	"github.com/aligator/godrop/server"
+	"github.com/aligator/godrop/server/log"
 	"github.com/aligator/godrop/server/repository/model"
 	"io"
 
@@ -11,7 +11,7 @@ import (
 )
 
 type FileService struct {
-	Logger server.GoDropLogger
+	Logger log.GoDropLogger
 	Repos  *provider.Repositories
 }
 

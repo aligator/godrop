@@ -1,14 +1,14 @@
 package file
 
 import (
-	"github.com/aligator/godrop/server"
+	"github.com/aligator/godrop/server/log"
 	"github.com/aligator/godrop/server/service"
 	"net/http"
 	"strings"
 )
 
 type Handler struct {
-	Logger      server.GoDropLogger
+	Logger      log.GoDropLogger
 	FileService *service.FileService
 	TrimSuffix  string
 }

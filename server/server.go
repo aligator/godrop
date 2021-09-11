@@ -9,6 +9,7 @@ import (
 	"github.com/aligator/godrop/server/file"
 	"github.com/aligator/godrop/server/graph"
 	"github.com/aligator/godrop/server/graph/generated"
+	"github.com/aligator/godrop/server/log"
 	"github.com/aligator/godrop/server/provider"
 	"github.com/aligator/godrop/server/service"
 	"github.com/go-chi/chi/v5"
@@ -21,7 +22,7 @@ type Server struct {
 	Host           string
 	AllowedOrigins []string
 	Repos          *provider.Repositories
-	Logger         GoDropLogger
+	Logger         log.GoDropLogger
 
 	router *chi.Mux
 }

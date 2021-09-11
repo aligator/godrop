@@ -2,12 +2,13 @@ package main
 
 import (
 	"github.com/aligator/godrop/server"
+	"github.com/aligator/godrop/server/log"
 	"github.com/aligator/godrop/server/provider"
 	"os"
 )
 
 func main() {
-	logger := server.DefaultLogger()
+	logger := log.DefaultLogger()
 
 	filesLocation := os.Getenv("GODROP_FILES")
 	if filesLocation == "" {

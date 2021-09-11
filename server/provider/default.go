@@ -10,16 +10,16 @@ type Repositories struct {
 	File repository.File
 }
 
-func NewDefaultRepos() (*Repositories, error) {
+func NewDefaultRepos(filesLocation string) (*Repositories, error) {
 	fsProvider := new(filesystem.Provider)
+	err := fsProvider.Init(filesLocation)
+	if err != nil {
+		return nil, err
+	}
 
 	repos := &Repositories{
 		Node: fsProvider,
 		File: fsProvider,
-	}
-	err := fsProvider.Init()
-	if err != nil {
-		return nil, err
 	}
 
 	return repos, nil

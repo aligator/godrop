@@ -15,7 +15,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-const defaultPath = "./files"
 const uploadSuffix = ".uploading"
 
 var (
@@ -26,20 +25,24 @@ type Provider struct {
 	FS afero.Fs
 }
 
-func (p *Provider) Init() error {
+func (p *Provider) Init(filesLocation string) error {
 	if p.FS == nil {
 
-		if err := os.Mkdir(defaultPath, 0775); !os.IsExist(err) {
+		if err := os.Mkdir(filesLocation, 0775); !os.IsExist(err) {
 			return checkpoint.From(err)
 		}
 
-		p.FS = afero.NewBasePathFs(afero.NewOsFs(), defaultPath)
+		p.FS = afero.NewBasePathFs(afero.NewOsFs(), filesLocation)
 	}
 
 	return nil
 }
 
 func (p *Provider) readFileNode(path string, withChildren bool) (model.FileNode, error) {
+	if p.FS == nil {
+		panic("call Init first")
+	}
+
 	result := model.FileNode{}
 
 	file, err := p.FS.Open(path)

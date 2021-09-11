@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/aligator/checkpoint"
+	"github.com/aligator/godrop/server"
 	"github.com/aligator/godrop/server/repository/model"
 	"io"
 
@@ -10,7 +11,8 @@ import (
 )
 
 type FileService struct {
-	Repos *provider.Repositories
+	Logger server.GoDropLogger
+	Repos  *provider.Repositories
 }
 
 func (f FileService) Upload(ctx context.Context, id string, reader io.Reader) error {

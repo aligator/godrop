@@ -2,13 +2,15 @@ package service
 
 import (
 	"context"
+	"github.com/aligator/godrop/server"
 
 	"github.com/aligator/godrop/server/provider"
 	"github.com/aligator/godrop/server/repository/model"
 )
 
 type FileNodeService struct {
-	Repos *provider.Repositories
+	Logger server.GoDropLogger
+	Repos  *provider.Repositories
 }
 
 func (n FileNodeService) GetFileNodeByPath(ctx context.Context, path string) (model.FileNode, error) {

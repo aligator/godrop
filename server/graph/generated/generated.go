@@ -291,7 +291,7 @@ type Query {
   getFileNode(path: String!): FileNode!
 }
 
-input Create {
+input CreateFileNode {
   name: String!
   path: String!
   description: String!
@@ -305,7 +305,7 @@ input UpdateFileNode {
 }
 
 type Mutation {
-  createFileNode(meta: Create!): FileNode!
+  createFileNode(meta: CreateFileNode!): FileNode!
   removeFileNode(id: ID!): ID!
   updateFileNode(id: ID!, newMeta: UpdateFileNode!): FileNode!
 }`, BuiltIn: false},

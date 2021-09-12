@@ -40,8 +40,13 @@ input CreateFileNode {
   mimeType: String
 }
 
+input UpdateFileNode {
+  name: String
+  description: String
+}
+
 type Mutation {
-  # TODO: maybe later use Signed URLs instead:
-  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
   createFileNode(meta: CreateFileNode!): FileNode!
+  removeFileNode(id: ID!): ID!
+  updateFileNode(id: ID!, newMeta: UpdateFileNode!): FileNode!
 }

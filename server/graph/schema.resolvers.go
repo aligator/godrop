@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aligator/godrop/server/graph/dto"
 	"github.com/aligator/godrop/server/graph/generated"
@@ -19,6 +20,14 @@ func (r *mutationResolver) CreateFileNode(ctx context.Context, meta dto.CreateFi
 
 	res := dto.FileNodeFromModel(fileNode)
 	return &res, nil
+}
+
+func (r *mutationResolver) RemoveFileNode(ctx context.Context, id string) (string, error) {
+	return r.FileNodeService.DeleteFileNode(ctx, id)
+}
+
+func (r *mutationResolver) UpdateFileNode(ctx context.Context, id string, newMeta dto.UpdateFileNode) (*dto.FileNode, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) GetFileNode(ctx context.Context, path string) (*dto.FileNode, error) {

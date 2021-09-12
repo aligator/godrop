@@ -8,4 +8,5 @@ import (
 type File interface {
 	Save(ctx context.Context, id string, reader io.Reader) error
 	Read(ctx context.Context, id string, writer io.Writer) error
+	Delete(ctx context.Context, id string) error
 }

@@ -9,15 +9,27 @@ import (
 
 var (
 	ErrFileAlreadyExists = errors.New("file already exists")
+	ErrFileNotFound      = errors.New("file not found")
 )
 
 type FileNode interface {
-	GetFileNodeByPath(ctx context.Context, path string) (model.FileNode, error)
-	GetFileNodeById(ctx context.Context, id string) (model.FileNode, error)
+	// GetByPath reads the file node at the given path.
+	// It may return ErrFileNotFound.
+	GetByPath(ctx context.Context, path string) (model.FileNode, error)
 
-	// CreateFileNode creates the given file.
+	// GetById reads the file node with the given ID.
+	// It may return ErrFileNotFound.
+	GetById(ctx context.Context, id model.ID) (model.FileNode, error)
+
+	// Create creates the given file.
 	// It may return ErrFileAlreadyExists.
-	CreateFileNode(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error)
+	Create(ctx context.Context, newFileNode model.CreateFileNode) (model.FileNode, error)
 
-	SetState(ctx context.Context, id string, newState model.NodeState) error
+	// DeleteById deletes the node with the given ID.
+	// It may return ErrFileNotFound.
+	DeleteById(ctx context.Context, id model.ID) error
+
+	// SetState changes the state of the node with the given ID.
+	// It may return ErrFileNotFound.
+	SetState(ctx context.Context, id model.ID, newState model.NodeState) error
 }

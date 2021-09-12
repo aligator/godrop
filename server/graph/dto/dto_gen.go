@@ -27,6 +27,11 @@ type FileNode struct {
 	Children    []FileNode `json:"children"`
 }
 
+type UpdateFileNode struct {
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+}
+
 type NodeState string
 
 const (

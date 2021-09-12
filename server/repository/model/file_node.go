@@ -1,5 +1,7 @@
 package model
 
+type ID = string
+
 type NodeState = string
 
 const (
@@ -8,7 +10,7 @@ const (
 )
 
 type FileNode struct {
-	ID          string
+	ID          ID
 	Name        string
 	Description string
 	IsFolder    bool
@@ -24,4 +26,9 @@ type CreateFileNode struct {
 	Description string
 	IsFolder    bool
 	MimeType    string
+}
+
+type UpdateFileNode struct {
+	Name        string
+	Description string
 }

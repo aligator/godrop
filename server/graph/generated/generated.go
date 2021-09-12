@@ -56,6 +56,8 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateFileNode func(childComplexity int, meta dto.CreateFileNode) int
+		RemoveFileNode func(childComplexity int, id string) int
+		UpdateFileNode func(childComplexity int, id string, newMeta dto.UpdateFileNode) int
 	}
 
 	Query struct {
@@ -65,6 +67,8 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateFileNode(ctx context.Context, meta dto.CreateFileNode) (*dto.FileNode, error)
+	RemoveFileNode(ctx context.Context, id string) (string, error)
+	UpdateFileNode(ctx context.Context, id string, newMeta dto.UpdateFileNode) (*dto.FileNode, error)
 }
 type QueryResolver interface {
 	GetFileNode(ctx context.Context, path string) (*dto.FileNode, error)
@@ -152,6 +156,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateFileNode(childComplexity, args["meta"].(dto.CreateFileNode)), true
+
+	case "Mutation.removeFileNode":
+		if e.complexity.Mutation.RemoveFileNode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeFileNode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveFileNode(childComplexity, args["id"].(string)), true
+
+	case "Mutation.updateFileNode":
+		if e.complexity.Mutation.UpdateFileNode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFileNode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFileNode(childComplexity, args["id"].(string), args["newMeta"].(dto.UpdateFileNode)), true
 
 	case "Query.getFileNode":
 		if e.complexity.Query.GetFileNode == nil {
@@ -263,7 +291,7 @@ type Query {
   getFileNode(path: String!): FileNode!
 }
 
-input CreateFileNode {
+input Create {
   name: String!
   path: String!
   description: String!
@@ -271,10 +299,15 @@ input CreateFileNode {
   mimeType: String
 }
 
+input UpdateFileNode {
+  name: String
+  description: String
+}
+
 type Mutation {
-  # TODO: maybe later use Signed URLs instead:
-  # https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/
-  createFileNode(meta: CreateFileNode!): FileNode!
+  createFileNode(meta: Create!): FileNode!
+  removeFileNode(id: ID!): ID!
+  updateFileNode(id: ID!, newMeta: UpdateFileNode!): FileNode!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -295,6 +328,45 @@ func (ec *executionContext) field_Mutation_createFileNode_args(ctx context.Conte
 		}
 	}
 	args["meta"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeFileNode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFileNode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 dto.UpdateFileNode
+	if tmp, ok := rawArgs["newMeta"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newMeta"))
+		arg1, err = ec.unmarshalNUpdateFileNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐUpdateFileNode(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newMeta"] = arg1
 	return args, nil
 }
 
@@ -666,6 +738,90 @@ func (ec *executionContext) _Mutation_createFileNode(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateFileNode(rctx, args["meta"].(dto.CreateFileNode))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*dto.FileNode)
+	fc.Result = res
+	return ec.marshalNFileNode2ᚖgithubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐFileNode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_removeFileNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_removeFileNode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveFileNode(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateFileNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateFileNode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFileNode(rctx, args["id"].(string), args["newMeta"].(dto.UpdateFileNode))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1934,6 +2090,34 @@ func (ec *executionContext) unmarshalInputCreateFileNode(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateFileNode(ctx context.Context, obj interface{}) (dto.UpdateFileNode, error) {
+	var it dto.UpdateFileNode
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2015,6 +2199,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createFileNode":
 			out.Values[i] = ec._Mutation_createFileNode(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "removeFileNode":
+			out.Values[i] = ec._Mutation_removeFileNode(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateFileNode":
+			out.Values[i] = ec._Mutation_updateFileNode(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2405,6 +2599,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateFileNode2githubᚗcomᚋaligatorᚋgodropᚋserverᚋgraphᚋdtoᚐUpdateFileNode(ctx context.Context, v interface{}) (dto.UpdateFileNode, error) {
+	res, err := ec.unmarshalInputUpdateFileNode(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

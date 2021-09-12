@@ -93,10 +93,11 @@ func (p NodeProvider) Create(ctx context.Context, newFileNode model.CreateFileNo
 
 	// Check if the file already exists.
 	_, err := openById(p.FS, newFileId)
-	if err != nil && errors.Is(err, afero.ErrFileNotFound) {
-		return model.FileNode{}, checkpoint.Wrap(err, repository.ErrFileAlreadyExists)
-	} else if err != nil {
+	if err != nil && !errors.Is(err, repository.ErrFileNotFound) {
 		return model.FileNode{}, checkpoint.From(err)
+	}
+	if err == nil {
+		return model.FileNode{}, checkpoint.From(repository.ErrFileAlreadyExists)
 	}
 
 	if newFileNode.IsFolder {

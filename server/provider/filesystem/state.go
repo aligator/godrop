@@ -58,6 +58,20 @@ func openFileById(fs afero.Fs, id string, flag int, perm os.FileMode) (afero.Fil
 	return nil, checkpoint.From(repository.ErrFileNotFound)
 }
 
+// existsById returns true if the file exists and false if not.
+// It returns an error if the error is not an repository.ErrFileNotFound.
+func existsById(fs afero.Fs, id string) (bool, error) {
+	file, err := openFileById(fs, id, os.O_RDONLY, 0)
+	if errors.Is(err, repository.ErrFileNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, checkpoint.From(err)
+	}
+	file.Close()
+	return true, nil
+}
+
 // openById is the equivalent to fs.Open and opens the file
 // no matter what state-suffix it currently has.
 // It opens the file readonly.

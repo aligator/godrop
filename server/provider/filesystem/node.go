@@ -3,6 +3,7 @@ package filesystem
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/aligator/checkpoint"
 	"github.com/aligator/godrop/server/repository"
 	"github.com/aligator/godrop/server/repository/model"
@@ -53,7 +54,7 @@ func (p NodeProvider) readFileNode(path string, withChildren bool) (model.FileNo
 			// Populate the children without the children.
 			childFileNode, err := p.readFileNode(filepath.Join(path, child), false)
 			if err != nil {
-				return model.FileNode{}, checkpoint.From(err)
+				return model.FileNode{}, checkpoint.Wrap(err, fmt.Errorf("file %v", filepath.Join(path, child)))
 			}
 
 			result.Children = append(result.Children, childFileNode)
@@ -92,13 +93,11 @@ func (p NodeProvider) Create(ctx context.Context, newFileNode model.CreateFileNo
 	newFileId := filepath.Join(newFileNode.Path, newFileNode.Name)
 
 	// Check if the file already exists.
-	file, err := openById(p.FS, newFileId)
-	defer file.Close()
-
-	if err != nil && !errors.Is(err, repository.ErrFileNotFound) {
+	exists, err := existsById(p.FS, newFileId)
+	if err != nil {
 		return model.FileNode{}, checkpoint.From(err)
 	}
-	if err == nil {
+	if exists {
 		return model.FileNode{}, checkpoint.From(repository.ErrFileAlreadyExists)
 	}
 
@@ -110,12 +109,13 @@ func (p NodeProvider) Create(ctx context.Context, newFileNode model.CreateFileNo
 	} else {
 		newFilePath := getStateFilename(newFileId, uploadSuffix)
 
-		_, err := p.FS.Create(newFilePath)
+		file, err := p.FS.Create(newFilePath)
 		if errors.Is(err, afero.ErrFileExists) {
 			return model.FileNode{}, checkpoint.Wrap(err, repository.ErrFileAlreadyExists)
 		} else if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
+		file.Close()
 	}
 
 	return p.GetByPath(ctx, newFileId)
@@ -146,8 +146,13 @@ func (p NodeProvider) DeleteById(_ context.Context, id model.ID) error {
 	if err != nil {
 		return checkpoint.From(err)
 	}
-	defer file.Close()
 
-	err = p.FS.Rename(file.Name(), getStateFilename(file.Name(), deleteSuffix))
+	name := file.Name()
+	err = file.Close()
+	if err != nil {
+		return checkpoint.From(err)
+	}
+
+	err = p.FS.Rename(name, getStateFilename(name, deleteSuffix))
 	return checkpoint.From(err)
 }

@@ -46,11 +46,15 @@ func (p FileProvider) Delete(_ context.Context, id string) error {
 	if err != nil {
 		return checkpoint.From(err)
 	}
-	defer file.Close()
 
-	if getStateOf(file.Name()) != deleteSuffix {
+	name := file.Name()
+	if err = file.Close(); err != nil {
+		return checkpoint.From(err)
+	}
+
+	if getStateOf(name) != deleteSuffix {
 		return checkpoint.From(ErrFileIsNotInDeleteState)
 	}
 
-	return checkpoint.From(p.FS.RemoveAll(file.Name()))
+	return checkpoint.From(p.FS.RemoveAll(name))
 }

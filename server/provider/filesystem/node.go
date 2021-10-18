@@ -92,7 +92,9 @@ func (p NodeProvider) Create(ctx context.Context, newFileNode model.CreateFileNo
 	newFileId := filepath.Join(newFileNode.Path, newFileNode.Name)
 
 	// Check if the file already exists.
-	_, err := openById(p.FS, newFileId)
+	file, err := openById(p.FS, newFileId)
+	defer file.Close()
+
 	if err != nil && !errors.Is(err, repository.ErrFileNotFound) {
 		return model.FileNode{}, checkpoint.From(err)
 	}

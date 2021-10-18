@@ -58,23 +58,37 @@ func openFileById(fs afero.Fs, id string, flag int, perm os.FileMode) (afero.Fil
 	return nil, checkpoint.From(repository.ErrFileNotFound)
 }
 
+// openById is the equivalent to fs.Open and opens the file
+// no matter what state-suffix it currently has.
+// It opens the file readonly.
+func openReadonlyById(fs afero.Fs, id string) (afero.File, error) {
+	return openFileById(fs, id, os.O_RDONLY, 0)
+}
+
+// statFileById is the equivalent to fs.Stat no matter what state-suffix it currently has.
+func statById(fs afero.Fs, id string) (os.FileInfo, error) {
+	// Try all possible paths.
+	for _, state := range states {
+		stats, err := fs.Stat(getStateFilename(id, state))
+		if errors.Is(err, afero.ErrFileNotFound) {
+			continue
+		}
+
+		return stats, checkpoint.From(err)
+	}
+
+	return nil, checkpoint.From(repository.ErrFileNotFound)
+}
+
 // existsById returns true if the file exists and false if not.
-// It returns an error if the error is not an repository.ErrFileNotFound.
+// It returns an error if the error is not a repository.ErrFileNotFound.
 func existsById(fs afero.Fs, id string) (bool, error) {
-	file, err := openFileById(fs, id, os.O_RDONLY, 0)
+	_, err := statById(fs, id)
 	if errors.Is(err, repository.ErrFileNotFound) {
 		return false, nil
 	}
 	if err != nil {
 		return false, checkpoint.From(err)
 	}
-	file.Close()
 	return true, nil
-}
-
-// openById is the equivalent to fs.Open and opens the file
-// no matter what state-suffix it currently has.
-// It opens the file readonly.
-func openById(fs afero.Fs, id string) (afero.File, error) {
-	return openFileById(fs, id, os.O_RDONLY, 0)
 }

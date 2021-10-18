@@ -42,19 +42,14 @@ func (p FileProvider) Read(_ context.Context, id model.ID, writer io.Writer) err
 }
 
 func (p FileProvider) Delete(_ context.Context, id string) error {
-	file, err := openById(p.FS, id)
+	stats, err := statById(p.FS, id)
 	if err != nil {
 		return checkpoint.From(err)
 	}
 
-	name := file.Name()
-	if err = file.Close(); err != nil {
-		return checkpoint.From(err)
-	}
-
-	if getStateOf(name) != deleteSuffix {
+	if getStateOf(stats.Name()) != deleteSuffix {
 		return checkpoint.From(ErrFileIsNotInDeleteState)
 	}
 
-	return checkpoint.From(p.FS.RemoveAll(name))
+	return checkpoint.From(p.FS.RemoveAll(stats.Name()))
 }

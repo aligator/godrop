@@ -24,19 +24,13 @@ type NodeProvider struct {
 func (p NodeProvider) readFileNode(path string, withChildren bool) (model.FileNode, error) {
 	result := model.FileNode{}
 
-	file, err := openById(p.FS, path)
-	if err != nil {
-		return model.FileNode{}, checkpoint.From(err)
-	}
-	defer file.Close()
-
-	fileStat, err := file.Stat()
+	stats, err := statById(p.FS, path)
 	if err != nil {
 		return model.FileNode{}, checkpoint.From(err)
 	}
 
-	result.IsFolder = fileStat.IsDir()
-	result.Name = filepath.Base(file.Name())
+	result.IsFolder = stats.IsDir()
+	result.Name = filepath.Base(stats.Name())
 
 	// For now just use the path as id.
 	// Later we will cache all files in a db and can use that id.
@@ -45,7 +39,17 @@ func (p NodeProvider) readFileNode(path string, withChildren bool) (model.FileNo
 	result.MimeType = mime.TypeByExtension(filepath.Ext(result.Name))
 
 	if result.IsFolder && withChildren {
-		children, err := file.Readdirnames(0)
+		folder, err := openReadonlyById(p.FS, path)
+		if err != nil {
+			return model.FileNode{}, checkpoint.From(err)
+		}
+
+		children, err := folder.Readdirnames(0)
+		if err != nil {
+			return model.FileNode{}, checkpoint.From(err)
+		}
+
+		err = folder.Close()
 		if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
@@ -61,7 +65,7 @@ func (p NodeProvider) readFileNode(path string, withChildren bool) (model.FileNo
 		}
 	}
 
-	result.Size = fileStat.Size()
+	result.Size = stats.Size()
 
 	if strings.HasSuffix(result.Name, uploadSuffix) {
 		result.State = model.NodeStateUpload
@@ -115,7 +119,10 @@ func (p NodeProvider) Create(ctx context.Context, newFileNode model.CreateFileNo
 		} else if err != nil {
 			return model.FileNode{}, checkpoint.From(err)
 		}
-		file.Close()
+		err = file.Close()
+		if err != nil {
+			return model.FileNode{}, checkpoint.From(err)
+		}
 	}
 
 	return p.GetByPath(ctx, newFileId)
@@ -142,17 +149,11 @@ func (p NodeProvider) SetState(ctx context.Context, id model.ID, newState model.
 }
 
 func (p NodeProvider) DeleteById(_ context.Context, id model.ID) error {
-	file, err := openById(p.FS, id)
+	stats, err := statById(p.FS, id)
 	if err != nil {
 		return checkpoint.From(err)
 	}
 
-	name := file.Name()
-	err = file.Close()
-	if err != nil {
-		return checkpoint.From(err)
-	}
-
-	err = p.FS.Rename(name, getStateFilename(name, deleteSuffix))
+	err = p.FS.Rename(stats.Name(), getStateFilename(stats.Name(), deleteSuffix))
 	return checkpoint.From(err)
 }

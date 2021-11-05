@@ -1,16 +1,19 @@
 package provider
 
 import (
+	"os"
+
 	"github.com/aligator/checkpoint"
 	"github.com/aligator/godrop/server/provider/filesystem"
+	"github.com/aligator/godrop/server/provider/keycloak"
 	"github.com/aligator/godrop/server/repository"
 	"github.com/spf13/afero"
-	"os"
 )
 
 type Repositories struct {
 	Node repository.FileNode
 	File repository.File
+	Auth repository.Auth
 }
 
 func NewDefaultRepos(filesLocation string) (*Repositories, error) {
@@ -24,6 +27,12 @@ func NewDefaultRepos(filesLocation string) (*Repositories, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	keycloak.New(keycloak.Config{
+		Host:     "http://localhost:7080",
+		Realm:    "godrop",
+		ClientID: "godrop",
+	})
 
 	repos := &Repositories{
 		Node: nodeProvider,

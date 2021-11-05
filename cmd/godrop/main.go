@@ -1,10 +1,11 @@
 package main
 
 import (
+	"os"
+
 	"github.com/aligator/godrop/server"
 	"github.com/aligator/godrop/server/log"
 	"github.com/aligator/godrop/server/provider"
-	"os"
 )
 
 func main() {

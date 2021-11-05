@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/aligator/godrop"
-	"github.com/aligator/godrop/server/file"
+	"github.com/aligator/godrop/server/controller"
 	"github.com/aligator/godrop/server/graph"
 	"github.com/aligator/godrop/server/graph/generated"
 	"github.com/aligator/godrop/server/log"
@@ -15,7 +17,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"net/http"
 )
 
 type Server struct {
@@ -54,10 +55,13 @@ func (s *Server) Init() *chi.Mux {
 		return err
 	})
 
+	authController := controller.AuthController{}
+	s.router.Use(authController.JWTMiddleware)
+
 	s.router.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	s.router.Handle("/query", srv)
 	s.router.Handle("/schema.graphql", &godrop.SchemaHandler{})
-	s.router.Handle("/file/*", &file.Handler{
+	s.router.Handle("/file/*", &controller.FileController{
 		Logger: s.Logger,
 		FileService: &service.FileService{
 			Logger: s.Logger,
